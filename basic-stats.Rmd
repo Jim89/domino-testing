@@ -1,0 +1,42 @@
+---
+title: "Basic Statistics"
+author: "Jim Leach"
+date: "7 January 2017"
+output: 
+  html_document:
+    theme: readable
+    code_folding: hide
+---
+
+```{r setup, include = FALSE}
+library(dplyr)
+library(ggplot2)
+```
+
+
+## Visualisation of values
+
+The plot below shows the distribution of the values you supplied in your uploaded file.
+
+```{r fig.align = 'centre', fig.cap = 'Figure 1: Histogram of supplied values'}
+ggplot(data, aes(x)) +
+  geom_histogram(fill = "steelblue", colour = "white", bins = 30) +
+  theme_minimal()
+```
+
+## Summary Statistics
+
+Table 1 shows some basic summary statistics for the supplied values.
+
+```{r}
+data %>%
+  summarise(min = min(x),
+            first = quantile(x, 0.25),
+            med = median(x),
+            mean = mean(x),
+            sd = sd(x),
+            third = quantile(x, .75),
+            max = max(x)) %>% 
+  knitr::kable(col.names = c("Min", "1st Qu.", "Median", "Mean", "Std. Dev.", "3rd Qu.", "Max"))
+```
+
