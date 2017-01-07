@@ -16,10 +16,15 @@ def gender_feature(word):
     return {'last_letter': word[-1]}
     
 # Now pull through the sample of names from nltk to prepare list of example names
-from nltk.corpus import names 
+males = open("./male.txt", "r").read().split('\n')
+females = open("./female.txt", "r").read().split('\n')
+
+# Remove 0-length names (import errors)
+males = filter(len, males)
+females = filter(len, females)
 
 # Now label the names
-labelled_names = ([(name, 'male') for name in names.words('male.txt')] + [(name, 'female') for name in names.words('female.txt')])
+labelled_names = ([(name, 'male') for name in males] + [(name, 'female') for name in females])
    
 # Then randomly shuffle them up
 import random
