@@ -11,3 +11,14 @@ output:
 ## Basic stats launcher
 
 1. Launchers -> New launcher
+2. Create example launcher
+3. Create first test launcher with basic script - works, but dones't generate output
+4. Switch to Rmd file for script - works but doesn't accept parameters so can't pass it the file
+5. Use script to read in data then run render to create HTML file which works because the data exists in the same environment (horrible hack but works for now)
+6. Tidy up Rmd file to produce neat output in HTML
+
+Total time: 45 minutes
+
+Sources:
+
+http://support.dominodatalab.com/hc/en-us/articles/204139569-Launchers#tutorial
