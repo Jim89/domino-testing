@@ -1,0 +1,13 @@
+---
+title: "Domino - Take Home Assignment"
+subtitle: "NLTK API & Basic Stats Launcher"
+author: "Jim Leach"
+date: "7 January 2017"
+output: 
+  html_document:
+    theme: readable
+---
+
+## Basic stats launcher
+
+1. Launchers -> New launcher
