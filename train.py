@@ -37,4 +37,5 @@ featuresets = [(gender_feature(n), gender) for (n, gender) in labelled_names]
 train, test = featuresets[500:], featuresets[:500]  
 
 # Create a dead-simple Naive-Bayes classifier from the train set
+import nltk
 classifier = nltk.NaiveBayesClassifier.train(train)
