@@ -1,14 +1,6 @@
----
-title: "Domino Testing"
-subtitle: "NLTK Classifier API & Basic Stats Launcher"
-author: "Jim Leach"
-date: "7 January 2017"
-output: 
-  html_document:
-    fig_caption: yes
-    keep_md: yes
-    theme: readable
----
+# Domino Testing
+Jim Leach  
+7 January 2017  
 
 ## Overview
 
@@ -28,14 +20,16 @@ Creating a simple API endpoint on Domino turned out to be very straightforward. 
 
 The code for this example was really simple. First, I defined a simple function to extract the last letter from a name.
 
-```{python eval = F}
+
+```python
 def gender_feature(word):
     return {'last_letter': word[-1]}
 ```
 
 Then, read in the sample names that come as part of the `nltk` package. Usually this is possible directly with `nltk`, but I ran in to some trouble with the Domino platform not having the necessary data files from `nltk`, so I loaded the two files manually.
 
-```{python eval = F}
+
+```python
 males = open("./male.txt", "r").read().split('\n')
 females = open("./female.txt", "r").read().split('\n')
 
@@ -46,7 +40,8 @@ females = filter(len, females)
 
 Then I created a single data set with all the names, labelled them as either male or female and shuffled that list up to mix the two genders in together.
 
-```{python eval = F}
+
+```python
 labelled_names = ([(name, 'male') for name in males] + [(name, 'female') for name in females])
 
 import random
@@ -55,7 +50,8 @@ random.shuffle(labelled_names)
 
 The `gender_feature` function was then used to extract the last letter from each name, retaining the label for the classifier. After splitting the data into train and test sets the classifier (a simple [Naive-Bayes](https://en.wikipedia.org/wiki/Naive_Bayes_classifier) model) was trained with the training data.
 
-```{python eval = F}
+
+```python
 featuresets = [(gender_feature(n), gender) for (n, gender) in labelled_names]  
 
 # Then split into test and train
@@ -68,7 +64,8 @@ classifier = nltk.NaiveBayesClassifier.train(train)
 
 I tested the accuracy on the testing set, just to get an idea of how well it would work. (It wasn't too important to have an accurate classifier for this exercise, but I was curious).
 
-```{python eval = F}
+
+```python
 nltk.classify.accuracy(classifier, test)
 ```
 
@@ -78,7 +75,8 @@ The model performed reasonably well, getting an accuracy on the test set of 76%.
 
 Following the [documentation](http://support.dominodatalab.com/hc/en-us/articles/204173149-API-Endpoints-Model-Deployment) on the Domino page also proved very straightforward. The first thing I needed was a function that would accept an input (here, a new name) and then use the classifier to predict the gender:
 
-```{python eval = F}
+
+```python
 def get_gender(name):
     last_letter = gender_feature(name)
     gender = classifier.classify(last_letter)
@@ -97,7 +95,8 @@ I then followed the documentations intructions for publishing the function as an
 
 Everything seemed to have worked smoothly, so I tested out the functionality with the simple `Python` script provided. It seemed to be working as expected, so I tried `R` as well (typically the language I'd turn to first):
 
-```{r}
+
+```r
 # Load the libraries we need
 library(httr)
 library(jsonlite)
@@ -112,9 +111,14 @@ ans <- (content(response))
 ans$result
 ```
 
+```
+## [1] "male"
+```
+
 Again, working as expected. Just to see how the API handled multiple requests, I created a simple `R`function to test out the endpoint on a small handful of names.
 
-```{r}
+
+```r
 # Define function
 get_gender_from_api <- function(name) {
   url <- "https://trial.dominodatalab.com/v1/Jim89/domino-testing/endpoint"
@@ -128,6 +132,11 @@ ans$result
 }
 
 sapply(c("Jim", "Max", "Joy", "Jake", "Martina"), get_gender_from_api)
+```
+
+```
+##      Jim      Max      Joy     Jake  Martina 
+##   "male" "female" "female" "female" "female"
 ```
 
 The answers weren't 100% correct, but the endpoint was working as I expected it to, even with multiple requests. 
