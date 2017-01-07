@@ -9,15 +9,15 @@ I had two exercises to work on:
 * First, create a simple classifier with the Natural Language Tool Kit (`nltk`) in `Python` and deploy and API endpoint on the Domino platform to use that classifier for some simple text classification. 
 * Secondly, create a Launcher on the platform that used let's a user upload a text file of numbers (one per line). The launcher uses `R` (and the `knitr` package) to create a simple `HTML` report with some summary statistics and a histogram of the numbers.
 
-Testing out the Domino platform has been great. It works really nicely and I was able to easily create two simple examples of things I can imagine using a lot. End-to-end these two exercises probably took only 2 hours to put together, starting from scratch and with no experience using Domino before. Writing this summary brings the total to about 3 hours. All-in-all a great product with some fantastic functionality.
+Testing out the Domino platform has been great. It works really nicely and I was able to easily create two simple examples of things I can imagine using a lot. End-to-end these two exercises probably took only 2.5 hours to put together, starting from scratch and with no experience using Domino before. Writing this summary brings the total to about 3.5 hours. 
 
-I think my ease-of-use experiences are a testament to both the platform (the functionality seems pretty intuitive) as well as the very helpful [documentation](http://support.dominodatalab.com/hc/en-us). 
+A great product with fantastic functionality, and straightforward to use, too. I think my ease-of-use experiences are a testament to both the platform (the functionality seems pretty intuitive) as well as the very helpful [documentation](http://support.dominodatalab.com/hc/en-us). 
 
 As well as saving everything in a simple, public project on the Domino platform [here](https://trial.dominodatalab.com/u/Jim89/domino-testing/overview) I also created a small `GitHub` repository with my code in which lives [here](https://github.com/Jim89/domino-testing).
 
 ## `nltk` Text classification API
 
-Creating a simple API endpoint on Domino turned out to be very straightforward. I decided to use a simple [example](http://www.nltk.org/book/ch06.html) classifier from the `nltk` documentation: classifying names as male or female, based only on the last letter of the name [Bird, Klein and Loper, 2009]. 
+Creating a simple API endpoint on Domino turned out to be very straightforward. I decided to use a simple [example](http://www.nltk.org/book/ch06.html) classifier from the `nltk` book [Bird, Klein and Loper, 2009]: classifying names as male or female, based only on the last letter of the name. 
 
 ### Creating the classifier
 
@@ -88,15 +88,35 @@ def get_gender(name):
 
 I added this to the end of my script as per the instructions, and uploaded the whole thing to the Domino platform [here](https://trial.dominodatalab.com/u/Jim89/domino-testing/view/get-gender.py). Initially I tried to create and save the model as a `pickle` in a separate script. (The documentation suggests that can be sensible for large models that take a while to train). However I ran into some trouble with the platform not having the right packages for this, so I kept all my code in one file. This felt reasonable given the simplicity of the model and the consequently very low training times. After this, I ran the code to make sure it worked with no errors on the Domino platform (it did).
 
-I then followed the documentations intructions for publishing the function as an API endpoint. I:
+I then followed the documentations instructions for publishing the function as an API endpoint. I:
 
 1. Selected _Publish_ in the Domino menu
 2. Clicked on to _API Endpoint_
-3. Added the filename (`get-gender.py`) of my classifier in the 'file containing code to invoke' box
+3. Added the file name (`get-gender.py`) of my classifier in the 'file containing code to invoke' box
 4. Added my classification function (`get_gender()`) to the 'function to invoke' box
 5. Clicked publish
 
-Everything seemed to have worked smoothly, so I tested out the functionality with the simple `Python` script provided. It seemed to be working as expected, so I tried `R` as well (typically the language I'd turn to first):
+Everything seemed to have worked smoothly, so I tested out the functionality with the simple `Python` script provided:
+
+
+```python
+import requests
+ 
+response = requests.post("https://trial.dominodatalab.com/v1/Jim89/quick-start/endpoint",
+    headers = {
+        "X-Domino-Api-Key": "MY_API_KEY",
+        "Content-Type": "application/json"
+    },
+    json = {
+        "parameters": ["Jim"]
+    }
+)
+
+print('The answer is:')
+print(response.json()['result'])
+```
+
+It seemed to be working as expected, so I tried accessing it from `R` as well (typically the language I'd turn to first):
 
 
 ```r
@@ -139,14 +159,14 @@ sapply(c("Jim", "Max", "Joy", "Jake", "Martina"), get_gender_from_api)
 
 ```
 ##      Jim      Max      Joy     Jake  Martina 
-##   "male"   "male" "female" "female" "female"
+##   "male" "female" "female" "female" "female"
 ```
 
 The answers weren't 100% correct, but the endpoint was working as I expected it to, even with multiple requests. 
 
 ### Thoughts
 
-The API creation functionality was fantastic and very straightforward: from start to finish I was able to get it working in about 1 hour (and that included some time for me tinkering with `nltk` locally before getting things set up on Domino). Really impressive stuff and I'm keen to keep using this in the future.
+The API creation functionality was fantastic and very straightforward: from start to finish I was able to get it working in about 1.5 hours (and that included time for me tinkering with `nltk` data files locally before getting things set up on Domino). Really impressive stuff and I'm keen to keep using this in the future.
 
 ## Basic stats launcher
 
@@ -185,9 +205,9 @@ names(data) <- "x"
 
 ### Generating a HTML report
 
-I initially tried to put this code into an `Rmd` file and use `knitr` directly in the launcher. However I couldn't see how to do that either in the launcher dialog, or in the Domino documentation, so I instead created a very basic `Rmd` file separately that had the text and code I wanted to use to create the `HTML` report.
+I initially tried to put this code into an `Rmd` file and use `knitr` directly in the launcher. However I couldn't see how to do that either in the launcher dialogue, or in the Domino documentation, so I instead created a very basic `Rmd` file separately that had the text and code I wanted to use to create the `HTML` report.
 
-I then added a command to for `knitr` to process this file to the end of my existing script. The actual command comes from the `rmarkdown` package, but this calls `knit` underneath to create the output from the code.
+I then added a command to for `knitr` to process this file to the end of my existing script. The actual command comes from the `rmarkdown` package, but this calls `knit` underneath to create the output from the code. This works because the when the `Rmd` looks for the data supplied by the user, it finds it easily because the code above has read it in to `R` already. (Which is how I got around not being able to figure out if/how to add an `Rmd` script to the launcher directly).
 
 
 ```r
@@ -207,7 +227,8 @@ ggplot(data, aes(x)) +
   geom_histogram(fill = "steelblue", colour = "white", bins = 30) +
   theme_minimal()
 
-# Create the summary
+# Create the summary - use dplyr rather than summary() for easy tidying into a neat
+# HTML table with knitr::kable()
 data %>%
   summarise(min = min(x),
             first = quantile(x, 0.25),
