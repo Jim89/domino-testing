@@ -47,3 +47,9 @@ nltk.classify.accuracy(classifier, train)
 nltk.classify.accuracy(classifier, test)
 
 # Right, I know this is likely to be a crap classifier, but I need to get it working in Domino, so let's look at that now!
+
+# Need to add a function that will return the gender given a name!
+def get_gender(name):
+    last_letter = gender_feature(name)
+    gender = classifier.classify(last_letter)
+    return gender
