@@ -9,7 +9,7 @@ import requests
  
 response = requests.post("https://trial.dominodatalab.com/v1/Jim89/quick-start/endpoint",
     headers = {
-        "X-Domino-Api-Key": "Aa1eYnwdRinE9qwOy3xK1Si1xokifTLILBYVKDoHMEeS3EEGuRmX3rPK9qAVxh2z",
+        "X-Domino-Api-Key": "YOUR_API_KEY",
         "Content-Type": "application/json"
     },
     json = {
