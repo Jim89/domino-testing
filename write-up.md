@@ -4,13 +4,16 @@ Jim Leach
 
 ## Overview
 
-Testing out the Domino platform has been great. It works really nicely and I was able to easily create two simple examples of things I can imagine using a lot. End-to-end these two exercises probably took only 2 hours to put together, starting from scratch and with no experience using Domino before. 
+I had two exercises to work on: 
 
-I think this is a testament to both the platform itself (the functionality seems pretty intuitive) as well as the very helpful [documentation](http://support.dominodatalab.com/hc/en-us). 
+* First, create a simple classifier with the Natural Language Tool Kit (`nltk`) in `Python` and deploy and API endpoint on the Domino platform to use that classifier for some simple text classification. 
+* Secondly, create a Launcher on the platform that used let's a user upload a text file of numbers (one per line). The launcher uses `R` (and the `knitr` package) to create a simple `HTML` report with some summary statistics and a histogram of the numbers.
+
+Testing out the Domino platform has been great. It works really nicely and I was able to easily create two simple examples of things I can imagine using a lot. End-to-end these two exercises probably took only 2 hours to put together, starting from scratch and with no experience using Domino before. Writing this summary brings the total to about 3 hours. All-in-all a great product with some fantastic functionality.
+
+I think my ease-of-use experiences are a testament to both the platform (the functionality seems pretty intuitive) as well as the very helpful [documentation](http://support.dominodatalab.com/hc/en-us). 
 
 As well as saving everything in a simple, public project on the Domino platform [here](https://trial.dominodatalab.com/u/Jim89/domino-testing/overview) I also created a small `GitHub` repository with my code in which lives [here](https://github.com/Jim89/domino-testing).
-
-I had two exercises that I worked on. First, create a simple classifier with the Natural Language Tool Kit (`nltk`) in `Python` and deploy and API endpoint on the Domino platform to use that classifier for some simple text classification. Secondly, I created a Launcher on the platform that used let's a user upload a text file of numbers (one per line) and then uses `R` (and the `knitr` package) to create a simple `HTML` report with some simple summary statistics and a histogram.
 
 ## `nltk` Text classification API
 
@@ -136,7 +139,7 @@ sapply(c("Jim", "Max", "Joy", "Jake", "Martina"), get_gender_from_api)
 
 ```
 ##      Jim      Max      Joy     Jake  Martina 
-##   "male" "female" "female" "female" "female"
+##   "male"   "male" "female" "female" "female"
 ```
 
 The answers weren't 100% correct, but the endpoint was working as I expected it to, even with multiple requests. 
@@ -147,18 +150,80 @@ The API creation functionality was fantastic and very straightforward: from star
 
 ## Basic stats launcher
 
-1. Launchers -> New launcher
-2. Create example launcher
-3. Create first test launcher with basic script - works, but dones't generate output
-4. Switch to Rmd file for script - works but doesn't accept parameters so can't pass it the file
-5. Use script to read in data then run render to create HTML file which works because the data exists in the same environment (horrible hack but works for now)
-6. Tidy up Rmd file to produce neat output in HTML
+Creating a launcher also turned out to be straightforward. I followed the basic [example](http://support.dominodatalab.com/hc/en-us/articles/204139569-Launchers#tutorial) from the Domino documentation and got that working to get a better understanding of how launchers work.
 
-Total time: 45 minutes
+### Creating a script to run in the launcher
 
-Sources:
+The basic premise of a launcher seemed to be: 
 
-http://support.dominodatalab.com/hc/en-us/articles/204139569-Launchers#tutorial
+1. Create a script that can be run on demand, with or without extra parameters that can be specified by the user.
+2. Set up a launcher to use that script.
+3. Add the option for the user to specify parameters to the launcher.
+4. Edit the script to use the parameters, maybe add more parameters, keep tinkering until you're happy with the results.
+
+I was able to create a simple launcher with one parameter: a file type parameter to allow the user to upload a file. 
+
+I created a simple `R` script that used this parameter and read in the list of numbers provided in the file by the user. I made sure that the launcher would throw an error if the uploaded file had more than one column, as I wanted the functionality to be really simple.
+
+
+```r
+# Get the arguments from the launcher
+args <- commandArgs(trailingOnly = TRUE)
+
+# Get just the file (the first parameter)
+file <- args[1]
+
+# Read in the file
+data <- read.csv(file, header = F)
+
+# Throw error if more than one column
+stopifnot(ncol(data) == 1)
+
+# Set column names
+names(data) <- "x"
+```
+
+### Generating a HTML report
+
+I initially tried to put this code into an `Rmd` file and use `knitr` directly in the launcher. However I couldn't see how to do that either in the launcher dialog, or in the Domino documentation, so I instead created a very basic `Rmd` file separately that had the text and code I wanted to use to create the `HTML` report.
+
+I then added a command to for `knitr` to process this file to the end of my existing script. The actual command comes from the `rmarkdown` package, but this calls `knit` underneath to create the output from the code.
+
+
+```r
+rmarkdown::render("./basic-stats.Rmd")
+```
+
+The `Rmd` file was very simple, containing some brief explanatory text, and the following code snippets to create the histogram, and a basic statistical summary of the numbers provided by the user:
+
+
+```r
+# Load packages
+library(dplyr)
+library(ggplot2)
+
+# Create the histogram
+ggplot(data, aes(x)) +
+  geom_histogram(fill = "steelblue", colour = "white", bins = 30) +
+  theme_minimal()
+
+# Create the summary
+data %>%
+  summarise(min = min(x),
+            first = quantile(x, 0.25),
+            med = median(x),
+            mean = mean(x),
+            sd = sd(x),
+            third = quantile(x, .75),
+            max = max(x)) %>% 
+  knitr::kable(col.names = c("Min", "1st Qu.", "Median", "Mean", "Std. Dev.", "3rd Qu.", "Max"))
+```
+
+I then tested the launcher and neatened up the HTML output slightly with a nicer theme. It seemed to be working as I was expected, which again was really nice.
+
+### Thoughts 
+
+In total I probably spent about 45 minutes tinkering with the launcher to get things working as I wanted them to be. Again I was impressed with Domino's functionality and the ease with which something like this simple report can be created. (Also) again, I'm keen to see more and I'll be testing Domino out further.
 
 ***
 
