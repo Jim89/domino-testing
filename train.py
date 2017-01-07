@@ -39,3 +39,6 @@ train, test = featuresets[500:], featuresets[:500]
 # Create a dead-simple Naive-Bayes classifier from the train set
 import nltk
 classifier = nltk.NaiveBayesClassifier.train(train)
+
+import joblib
+joblib.dump(classifier, 'nltk-classifier.pkl')
